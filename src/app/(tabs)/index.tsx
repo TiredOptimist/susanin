@@ -1,146 +1,234 @@
-import domtoimage from 'dom-to-image';
-import * as ImagePicker from 'expo-image-picker';
-import * as MediaLibrary from 'expo-media-library/legacy';
-import { useEffect, useRef, useState } from 'react';
-import { ImageSourcePropType, Platform, StyleSheet, View } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { captureRef } from 'react-native-view-shot';
+import { router } from "expo-router";
+import { useState } from "react";
+import {
+  Alert,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import Button from '@/components/button';
-import CircleButton from '@/components/circle-button';
-import EmojiList from '@/components/emoji-list';
-import EmojiPicker from '@/components/emoji-picker';
-import EmojiSticker from '@/components/emoji-sticker';
-import IconButton from '@/components/icon-button';
-import ImageViewer from '@/components/image-viewer';
+import type { Marker } from "../../../types";
+import MapComponent from "../../components/Map";
+import ScreenHeader from "../../components/ScreenHeader";
+import { useMarkers } from "../../context/MarkerContext";
 
-const PlaceholderImage = require('@/assets/images/background-image.png');
+export default function HomeScreen() {
+  const { markers, addMarker } = useMarkers();
 
-export default function Index() {
-  const [selectedImage, setSelectedImage] = useState<string | undefined>(undefined);
-  const [showAppOptions, setShowAppOptions] = useState<boolean>(false);
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const [pickedEmoji, setPickedEmoji] = useState<ImageSourcePropType | undefined>(undefined);
-  const [permissionResponse, requestPermission] = ImagePicker.useMediaLibraryPermissions();
-  const imageRef = useRef<View>(null);
+  const [isNamingMarker, setIsNamingMarker] = useState(false);
+  const [markerTitle, setMarkerTitle] = useState("");
+  const [pendingCoordinates, setPendingCoordinates] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
-  useEffect(() => {
-    if (!permissionResponse?.granted) {
-      requestPermission();
+  const handleAddMarker = (
+    latitude: number,
+    longitude: number
+  ) => {
+    setPendingCoordinates({ latitude, longitude });
+    setMarkerTitle("");
+    setIsNamingMarker(true);
+  };
+
+  const handleCreateMarker = () => {
+    if (!pendingCoordinates) {
+      return;
     }
-  }, []);
 
-  const pickImageAsync = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      quality: 1,
-    });
+    const title = markerTitle.trim();
 
-    if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
-      setShowAppOptions(true);
-    } else {
-      alert('You did not select any image.');
+    if (!title) {
+      Alert.alert(
+        "Введите название",
+        "Название метки не может быть пустым."
+      );
+      return;
+    }
+
+    try {
+      addMarker(
+        pendingCoordinates.latitude,
+        pendingCoordinates.longitude,
+        title
+      );
+
+      setIsNamingMarker(false);
+      setMarkerTitle("");
+      setPendingCoordinates(null);
+    } catch (error) {
+      console.error("Ошибка создания маркера:", error);
+
+      Alert.alert(
+        "Ошибка",
+        "Не удалось создать метку."
+      );
     }
   };
 
-  const onReset = () => {
-    setShowAppOptions(false);
-    setSelectedImage(undefined);
-    setPickedEmoji(undefined);
-    setIsModalVisible(false);
-  };
+  const handleMarkerPress = (marker: Marker) => {
+    try {
+      router.push({
+        pathname: "/marker/[id]",
+        params: {
+          id: String(marker.id),
+        },
+      });
+    } catch (error) {
+      console.error("Ошибка навигации к маркеру:", error);
 
-  const onAddSticker = () => {
-    setIsModalVisible(true);
-  };
-
-  const onModalClose = () => {
-    setIsModalVisible(false);
-  };
-
-  const onSaveImageAsync = async () => {
-    if (Platform.OS !== 'web') {
-      try {
-        const localUri = await captureRef(imageRef, {
-          height: 440,
-          quality: 1,
-        });
-
-        await MediaLibrary.saveToLibraryAsync(localUri);
-        if (localUri) {
-          alert('Saved!');
-        }
-      } catch (e) {
-        console.log(e);
-      }
-    } else {
-      try {
-        const dataUrl = await domtoimage.toJpeg(imageRef.current, {
-          quality: 0.95,
-          width: 320,
-          height: 440,
-        });
-
-        let link = document.createElement('a');
-        link.download = 'sticker-smash.jpeg';
-        link.href = dataUrl;
-        link.click();
-      } catch (e) {
-        console.log(e);
-      }
+      Alert.alert(
+        "Ошибка",
+        "Не удалось открыть информацию о метке."
+      );
     }
   };
 
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <View style={styles.imageContainer}>
-        <View ref={imageRef} collapsable={false}>
-          <ImageViewer imgSource={PlaceholderImage} selectedImage={selectedImage} />
-          {pickedEmoji && <EmojiSticker imageSize={40} stickerSource={pickedEmoji} />}
-        </View>
+    <SafeAreaView style={styles.container}>
+      <ScreenHeader
+      title="Карта"
+      subtitle={`Меток: ${markers.length}`}
+      />
+
+      <View style={styles.mapContainer}>
+        <MapComponent
+          markers={markers}
+          onAddMarker={handleAddMarker}
+          onMarkerPress={handleMarkerPress}
+        />
       </View>
-      {showAppOptions ? (
-        <View style={styles.optionsContainer}>
-          <View style={styles.optionsRow}>
-            <IconButton icon="refresh" label="Reset" onPress={onReset} />
-            <CircleButton onPress={onAddSticker} />
-            <IconButton icon="save-alt" label="Save" onPress={onSaveImageAsync} />
+
+      {isNamingMarker && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modal}>
+            <Text style={styles.modalTitle}>
+              Новая метка
+            </Text>
+
+            <Text style={styles.modalText}>
+              Введите название места
+            </Text>
+
+            <TextInput
+              value={markerTitle}
+              onChangeText={setMarkerTitle}
+              placeholder="Например: Дом"
+              style={styles.input}
+              autoFocus
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => {
+                  setIsNamingMarker(false);
+                  setMarkerTitle("");
+                  setPendingCoordinates(null);
+                }}
+              >
+                <Text style={styles.cancelButtonText}>
+                  Отмена
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.createButton}
+                onPress={handleCreateMarker}
+              >
+                <Text style={styles.createButtonText}>
+                  Создать
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      ) : (
-        <View style={styles.footerContainer}>
-          <Button theme="primary" label="Choose a photo" onPress={pickImageAsync} />
-          <Button label="Use this photo" onPress={() => setShowAppOptions(true)} />
-        </View>
       )}
-      <EmojiPicker isVisible={isModalVisible} onClose={onModalClose}>
-        <EmojiList onSelect={setPickedEmoji} onCloseModal={onModalClose} />
-      </EmojiPicker>
-    </GestureHandlerRootView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#25292e',
-    alignItems: 'center',
+    backgroundColor: "#fff",
   },
-  imageContainer: {
+  
+  mapContainer: {
     flex: 1,
   },
-  footerContainer: {
-    flex: 1 / 3,
-    alignItems: 'center',
+
+  modalOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
   },
-  optionsContainer: {
-    position: 'absolute',
-    bottom: 80,
+
+  modal: {
+    width: "100%",
+    backgroundColor: "#fff",
+    borderRadius: 18,
+    padding: 20,
   },
-  optionsRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
+
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#222",
+  },
+
+  modalText: {
+    marginTop: 6,
+    marginBottom: 15,
+    color: "#777",
+  },
+
+  input: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 16,
+  },
+
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 15,
+    gap: 10,
+  },
+
+  cancelButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: "#eee",
+  },
+
+  cancelButtonText: {
+    color: "#444",
+    fontWeight: "600",
+  },
+
+  createButton: {
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: "#208AEF",
+  },
+
+  createButtonText: {
+    color: "#fff",
+    fontWeight: "600",
   },
 });

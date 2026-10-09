@@ -1,37 +1,46 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { Tabs } from 'expo-router';
+import { Tabs } from "expo-router";
+import { Text } from "react-native";
 
-export default function TabLayout() {
+export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#ffd33d',
-        tabBarInactiveTintColor: '#fff',
-        headerStyle: {
-          backgroundColor: '#25292e',
-        },
-        headerShadowVisible: false,
-        headerTintColor: '#fff',
+        headerShown: false,
+        tabBarActiveTintColor: "#208AEF",
+        tabBarInactiveTintColor: "#888",
         tabBarStyle: {
-          backgroundColor: '#25292e',
+          height: 65,
+          paddingTop: 8,
+          paddingBottom: 8,
+          backgroundColor: "#fff",
+          borderTopColor: "#E5E7EB",
+        },
+        tabBarLabelStyle: {
+          fontSize: 13,
+          fontWeight: "600",
         },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'home-sharp' : 'home-outline'} color={color} size={24} />
+          title: "Карта",
+          tabBarIcon: ({ color, size }) => (
+            <Text style={{ color, fontSize: size }}>
+              📍
+            </Text>
           ),
         }}
       />
+
       <Tabs.Screen
-        name="about"
+        name="markers"
         options={{
-          title: 'About',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'information-circle' : 'information-circle-outline'} color={color} size={24}/>
+          title: "Все метки",
+          tabBarIcon: ({ color, size }) => (
+            <Text style={{ color, fontSize: size }}>
+              ☰
+            </Text>
           ),
         }}
       />

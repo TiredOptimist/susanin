@@ -1,15 +1,13 @@
-import { Stack } from 'expo-router';
-
-import { StatusBar } from 'expo-status-bar';
-
+import { Stack } from "expo-router";
+import { MarkerProvider } from "../context/MarkerContext";
 
 export default function RootLayout() {
   return (
-    <>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    <MarkerProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="marker/[id]" />
       </Stack>
-      <StatusBar style="light" />
-    </>
+    </MarkerProvider>
   );
 }
