@@ -1,12 +1,12 @@
 import {
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
-import type { Marker } from "../../types";
+import type { Marker } from "../types";
 
 interface MarkerListProps {
   markers: Marker[];

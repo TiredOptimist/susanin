@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import MapView, {
-    LongPressEvent,
-    Marker as MapMarker,
+  LongPressEvent,
+  Marker as MapMarker,
 } from "react-native-maps";
 
-import type { Marker } from "../../types";
+import type { Marker } from "../types";
 
 interface MapComponentProps {
   markers: Marker[];

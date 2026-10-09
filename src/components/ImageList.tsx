@@ -1,13 +1,13 @@
 import {
-    Alert,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
-import type { MarkerImage } from "../../types";
+import type { MarkerImage } from "../types";
 
 interface ImageListProps {
   images: MarkerImage[];
