@@ -6,6 +6,8 @@ import {
   View,
 } from "react-native";
 
+import { colors } from "../constants/colors";
+import { fontSize, fontWeight, radii, spacing } from "../constants/config";
 import type { Marker } from "../types";
 
 interface MarkerListProps {
@@ -20,9 +22,7 @@ export default function MarkerList({
   if (markers.length === 0) {
     return (
       <View style={styles.empty}>
-        <Text style={styles.emptyText}>
-          Пока нет сохранённых меток
-        </Text>
+        <Text style={styles.emptyText}>Пока нет сохранённых меток</Text>
       </View>
     );
   }
@@ -38,19 +38,14 @@ export default function MarkerList({
           onPress={() => onMarkerPress(item)}
         >
           <View style={styles.markerIcon}>
-            <Text style={styles.markerIconText}>
-              📍
-            </Text>
+            <Text style={styles.markerIconText}>📍</Text>
           </View>
 
           <View style={styles.info}>
-            <Text style={styles.title}>
-              {item.title}
-            </Text>
+            <Text style={styles.title}>{item.title}</Text>
 
             <Text style={styles.coordinates}>
-              {item.latitude.toFixed(5)},{" "}
-              {item.longitude.toFixed(5)}
+              {item.latitude.toFixed(5)}, {item.longitude.toFixed(5)}
             </Text>
           </View>
 
@@ -63,18 +58,18 @@ export default function MarkerList({
 
 const styles = StyleSheet.create({
   list: {
-    padding: 16,
-    gap: 10,
+    padding: spacing.xxxl,
+    gap: spacing.lg,
   },
 
   item: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    padding: 14,
+    backgroundColor: colors.background,
+    borderRadius: radii.xl,
+    padding: spacing.xxl,
     elevation: 2,
-    shadowColor: "#000",
+    shadowColor: colors.shadow,
     shadowOpacity: 0.08,
     shadowRadius: 4,
     shadowOffset: {
@@ -86,45 +81,45 @@ const styles = StyleSheet.create({
   markerIcon: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: "#E8F2FF",
+    borderRadius: radii.round,
+    backgroundColor: colors.markerIconBg,
     justifyContent: "center",
     alignItems: "center",
   },
 
   markerIconText: {
-    fontSize: 22,
+    fontSize: fontSize.h2,
   },
 
   info: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: spacing.xl,
   },
 
   title: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#222",
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.semibold,
+    color: colors.textPrimary,
   },
 
   coordinates: {
-    marginTop: 4,
-    color: "#777",
-    fontSize: 12,
+    marginTop: spacing.xs,
+    color: colors.textSecondary,
+    fontSize: fontSize.xs,
   },
 
   arrow: {
-    fontSize: 28,
-    color: "#999",
+    fontSize: fontSize.display,
+    color: colors.textMuted,
   },
 
   empty: {
-    padding: 20,
+    padding: spacing.giant,
     alignItems: "center",
   },
 
   emptyText: {
-    color: "#777",
-    fontSize: 14,
+    color: colors.textSecondary,
+    fontSize: fontSize.md,
   },
 });

@@ -4,6 +4,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import MarkerList from "../../components/MarkerList";
 import ScreenHeader from "../../components/ScreenHeader";
+import { colors } from "../../constants/colors";
+import { spacing } from "../../constants/config";
 import { useDatabase } from "../../contexts/DatabaseContext";
 import type { Marker } from "../../types";
 
@@ -46,16 +48,18 @@ export default function MarkersScreen() {
         subtitle={`Сохранено меток: ${markers.length}`}
       />
 
-      <MarkerList
-        markers={markers}
-        onMarkerPress={handleMarkerPress}
-      />
+      <MarkerList markers={markers} onMarkerPress={handleMarkerPress} />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20 },
-  errorText: { color: "#666", textAlign: "center" },
+  container: { flex: 1, backgroundColor: colors.background },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: spacing.giant,
+  },
+  errorText: { color: colors.textLight, textAlign: "center" },
 });

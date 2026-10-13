@@ -11,23 +11,21 @@ import MapView, {
   Marker as MapMarker,
 } from "react-native-maps";
 
+import { colors } from "../constants/colors";
+import {
+  config,
+  fontSize,
+  fontWeight,
+  radii,
+  spacing,
+} from "../constants/config";
 import type { Marker } from "../types";
 
 interface MapComponentProps {
   markers: Marker[];
-  onAddMarker: (
-    latitude: number,
-    longitude: number
-  ) => void;
+  onAddMarker: (latitude: number, longitude: number) => void;
   onMarkerPress: (marker: Marker) => void;
 }
-
-const INITIAL_REGION = {
-  latitude: 55.751244,
-  longitude: 37.618423,
-  latitudeDelta: 0.15,
-  longitudeDelta: 0.15,
-};
 
 export default function MapComponent({
   markers,
@@ -44,14 +42,13 @@ export default function MapComponent({
           "Не удалось загрузить карту. Проверьте соединение и попробуйте снова."
         );
       }
-    }, 10000);
+    }, config.map.readyTimeoutMs);
 
     return () => clearTimeout(timeout);
   }, [isMapReady]);
 
   const handleLongPress = (event: LongPressEvent) => {
-    const { latitude, longitude } =
-      event.nativeEvent.coordinate;
+    const { latitude, longitude } = event.nativeEvent.coordinate;
 
     onAddMarker(latitude, longitude);
   };
@@ -59,13 +56,9 @@ export default function MapComponent({
   if (mapError) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorTitle}>
-          Ошибка карты
-        </Text>
+        <Text style={styles.errorTitle}>Ошибка карты</Text>
 
-        <Text style={styles.errorText}>
-          {mapError}
-        </Text>
+        <Text style={styles.errorText}>{mapError}</Text>
 
         <TouchableOpacity
           style={styles.retryButton}
@@ -74,9 +67,7 @@ export default function MapComponent({
             setIsMapReady(false);
           }}
         >
-          <Text style={styles.retryButtonText}>
-            Повторить
-          </Text>
+          <Text style={styles.retryButtonText}>Повторить</Text>
         </TouchableOpacity>
       </View>
     );
@@ -86,7 +77,7 @@ export default function MapComponent({
     <View style={styles.container}>
       <MapView
         style={styles.map}
-        initialRegion={INITIAL_REGION}
+        initialRegion={config.map.initialRegion}
         onMapReady={() => {
           setIsMapReady(true);
           setMapError(null);
@@ -112,11 +103,9 @@ export default function MapComponent({
       {!isMapReady && (
         <View style={styles.loadingOverlay}>
           <View style={styles.loadingBox}>
-            <ActivityIndicator size="large" />
+            <ActivityIndicator size="large" color={colors.primary} />
 
-            <Text style={styles.loadingText}>
-              Загрузка карты...
-            </Text>
+            <Text style={styles.loadingText}>Загрузка карты...</Text>
           </View>
         </View>
       )}
@@ -150,66 +139,66 @@ const styles = StyleSheet.create({
   },
 
   loadingBox: {
-    backgroundColor: "rgba(255,255,255,0.95)",
-    paddingHorizontal: 24,
-    paddingVertical: 20,
-    borderRadius: 16,
+    backgroundColor: colors.overlayLight,
+    paddingHorizontal: spacing.massive,
+    paddingVertical: spacing.giant,
+    borderRadius: radii.xxl,
     alignItems: "center",
   },
 
   loadingText: {
-    marginTop: 10,
-    fontSize: 15,
-    color: "#333",
+    marginTop: spacing.lg,
+    fontSize: fontSize.lg,
+    color: colors.textDark,
   },
 
   hint: {
     position: "absolute",
     top: 55,
-    left: 20,
-    right: 20,
-    backgroundColor: "rgba(0,0,0,0.75)",
-    borderRadius: 12,
-    padding: 12,
+    left: spacing.giant,
+    right: spacing.giant,
+    backgroundColor: colors.overlayHint,
+    borderRadius: radii.lg,
+    padding: spacing.xl,
   },
 
   hintText: {
-    color: "#fff",
+    color: colors.white,
     textAlign: "center",
-    fontSize: 14,
+    fontSize: fontSize.md,
   },
 
   errorContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 24,
-    backgroundColor: "#f5f5f5",
+    padding: spacing.massive,
+    backgroundColor: colors.backgroundAlt,
   },
 
   errorTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 10,
-    color: "#222",
+    fontSize: fontSize.h2,
+    fontWeight: fontWeight.bold,
+    marginBottom: spacing.lg,
+    color: colors.textPrimary,
   },
 
   errorText: {
-    fontSize: 15,
+    fontSize: fontSize.lg,
     textAlign: "center",
-    color: "#666",
-    marginBottom: 20,
+    color: colors.textLight,
+    marginBottom: spacing.giant,
   },
 
   retryButton: {
-    backgroundColor: "#208AEF",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 10,
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.massive,
+    paddingVertical: spacing.xl,
+    borderRadius: radii.md,
   },
 
   retryButtonText: {
-    color: "#fff",
-    fontWeight: "600",
+    color: colors.white,
+    fontWeight: fontWeight.semibold,
   },
 });

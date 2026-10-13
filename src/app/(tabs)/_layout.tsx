@@ -1,23 +1,26 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
+import { colors } from "../../constants/colors";
+import { config, fontWeight } from "../../constants/config";
+
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#208AEF",
-        tabBarInactiveTintColor: "#888",
+        tabBarActiveTintColor: colors.tabActive,
+        tabBarInactiveTintColor: colors.tabInactive,
         tabBarStyle: {
-          height: 65,
-          paddingTop: 8,
-          paddingBottom: 8,
-          backgroundColor: "#fff",
-          borderTopColor: "#E5E7EB",
+          height: config.tabs.height,
+          paddingTop: config.tabs.paddingTop,
+          paddingBottom: config.tabs.paddingBottom,
+          backgroundColor: colors.background,
+          borderTopColor: colors.borderLight,
         },
         tabBarLabelStyle: {
-          fontSize: 13,
-          fontWeight: "600",
+          fontSize: config.tabs.labelFontSize,
+          fontWeight: fontWeight.semibold,
         },
       }}
     >

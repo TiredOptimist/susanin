@@ -1,5 +1,8 @@
 import { StyleSheet, Text, View } from "react-native";
 
+import { colors } from "../constants/colors";
+import { fontSize, fontWeight, spacing } from "../constants/config";
+
 type Props = {
   title: string;
   subtitle: string;
@@ -16,18 +19,18 @@ export default function ScreenHeader({ title, subtitle }: Props) {
 
 const styles = StyleSheet.create({
   header: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: "#fff",
+    paddingHorizontal: spacing.giant,
+    paddingVertical: spacing.xl,
+    backgroundColor: colors.background,
   },
   title: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#222",
+    fontSize: fontSize.display,
+    fontWeight: fontWeight.bold,
+    color: colors.textPrimary,
   },
   subtitle: {
-    marginTop: 5,
-    fontSize: 14,
-    color: "#777",
+    marginTop: spacing.xs + 1,
+    fontSize: fontSize.md,
+    color: colors.textSecondary,
   },
 });

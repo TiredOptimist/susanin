@@ -3,7 +3,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,8 +12,17 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import ImageList from "../../components/ImageList";
+import { colors } from "../../constants/colors";
+import {
+  config,
+  fontSize,
+  fontWeight,
+  radii,
+  spacing,
+} from "../../constants/config";
 import { useDatabase } from "../../contexts/DatabaseContext";
 import type { Marker, MarkerImage } from "../../types";
+import { showConfirm, showError } from "../../utils/alerts";
 
 export default function MarkerDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -44,7 +52,6 @@ export default function MarkerDetailsScreen() {
     }
   }, [getMarkerImages, markerId]);
 
-  // Загружаем метку и изображения, когда БД готова
   useEffect(() => {
     if (isDbLoading) return;
 
@@ -57,10 +64,8 @@ export default function MarkerDetailsScreen() {
 
     (async () => {
       try {
-        // 1) Сначала пробуем из локального состояния
         let m = getMarker(markerId);
 
-        // 2) Если нет — идём в БД (например, открыли экран после перезапуска)
         if (!m) {
           m = (await loadMarker(markerId)) ?? undefined;
         }
@@ -87,33 +92,26 @@ export default function MarkerDetailsScreen() {
       else router.replace("/");
     } catch (e) {
       console.error("Ошибка возврата:", e);
-      Alert.alert("Ошибка", "Не удалось вернуться назад.");
+      showError("Не удалось вернуться назад.");
     }
   };
 
   const handleDeleteMarker = () => {
     if (!marker) return;
 
-    Alert.alert(
-      "Удалить метку?",
-      `Метка «${marker.title}» и связанные с ней изображения будут удалены.`,
-      [
-        { text: "Отмена", style: "cancel" },
-        {
-          text: "Удалить",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteMarker(markerId);
-              router.replace("/");
-            } catch (e) {
-              console.error("Ошибка удаления метки:", e);
-              Alert.alert("Ошибка", "Не удалось удалить метку.");
-            }
-          },
-        },
-      ]
-    );
+    showConfirm({
+      title: "Удалить метку?",
+      message: `Метка «${marker.title}» и связанные с ней изображения будут удалены.`,
+      onConfirm: async () => {
+        try {
+          await deleteMarker(markerId);
+          router.replace("/");
+        } catch (e) {
+          console.error("Ошибка удаления метки:", e);
+          showError("Не удалось удалить метку.");
+        }
+      },
+    });
   };
 
   const handleAddImage = async () => {
@@ -124,9 +122,9 @@ export default function MarkerDetailsScreen() {
         await ImagePicker.requestMediaLibraryPermissionsAsync();
 
       if (!permission.granted) {
-        Alert.alert(
-          "Нет доступа",
-          "Разрешите приложению доступ к фотографиям в настройках устройства."
+        showError(
+          "Разрешите приложению доступ к фотографиям в настройках устройства.",
+          "Нет доступа"
         );
         return;
       }
@@ -134,8 +132,8 @@ export default function MarkerDetailsScreen() {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images"],
         allowsMultipleSelection: true,
-        quality: 0.8,
-        selectionLimit: 10,
+        quality: config.imagePicker.quality,
+        selectionLimit: config.imagePicker.selectionLimit,
       });
 
       if (result.canceled) return;
@@ -147,7 +145,7 @@ export default function MarkerDetailsScreen() {
       await reloadImages();
     } catch (e) {
       console.error("Ошибка выбора изображения:", e);
-      Alert.alert("Ошибка", "Не удалось выбрать изображение. Попробуйте ещё раз.");
+      showError("Не удалось выбрать изображение. Попробуйте ещё раз.");
     } finally {
       setIsPickingImage(false);
     }
@@ -159,7 +157,7 @@ export default function MarkerDetailsScreen() {
       await reloadImages();
     } catch (e) {
       console.error("Ошибка удаления изображения:", e);
-      Alert.alert("Ошибка", "Не удалось удалить изображение.");
+      showError("Не удалось удалить изображение.");
     }
   };
 
@@ -236,12 +234,15 @@ export default function MarkerDetailsScreen() {
           </View>
 
           <TouchableOpacity
-            style={[styles.addButton, isPickingImage && styles.addButtonDisabled]}
+            style={[
+              styles.addButton,
+              isPickingImage && styles.addButtonDisabled,
+            ]}
             onPress={handleAddImage}
             disabled={isPickingImage}
           >
             {isPickingImage ? (
-              <ActivityIndicator color="#fff" size="small" />
+              <ActivityIndicator color={colors.white} size="small" />
             ) : (
               <Text style={styles.addButtonText}>+ Добавить</Text>
             )}
@@ -255,67 +256,123 @@ export default function MarkerDetailsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
-  content: { padding: 20, paddingBottom: 40 },
+  container: { flex: 1, backgroundColor: colors.background },
+  content: {
+    padding: spacing.giant,
+    paddingBottom: spacing.ultra,
+  },
 
-  back: { alignSelf: "flex-start", paddingVertical: 8, marginBottom: 10 },
-  backText: { color: "#208AEF", fontSize: 17, fontWeight: "600" },
+  back: {
+    alignSelf: "flex-start",
+    paddingVertical: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  backText: {
+    color: colors.primary,
+    fontSize: fontSize.xxl,
+    fontWeight: fontWeight.semibold,
+  },
 
-  title: { fontSize: 28, fontWeight: "700", color: "#222", marginBottom: 20 },
+  title: {
+    fontSize: fontSize.display,
+    fontWeight: fontWeight.bold,
+    color: colors.textPrimary,
+    marginBottom: spacing.giant,
+  },
 
   infoCard: {
-    backgroundColor: "#F5F7FA",
-    borderRadius: 16,
-    padding: 18,
-    marginBottom: 28,
+    backgroundColor: colors.backgroundCard,
+    borderRadius: radii.xxl,
+    padding: spacing.huge,
+    marginBottom: spacing.colossal,
   },
-  sectionTitle: { fontSize: 19, fontWeight: "700", color: "#222" },
+  sectionTitle: {
+    fontSize: fontSize.title,
+    fontWeight: fontWeight.bold,
+    color: colors.textPrimary,
+  },
   infoRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 10,
+    paddingVertical: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: colors.borderLight,
   },
-  label: { color: "#777", fontSize: 14 },
-  value: { color: "#222", fontSize: 14, fontWeight: "500", maxWidth: "60%", textAlign: "right" },
+  label: { color: colors.textSecondary, fontSize: fontSize.md },
+  value: {
+    color: colors.textPrimary,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
+    maxWidth: "60%",
+    textAlign: "right",
+  },
 
   imagesHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 14,
+    marginBottom: spacing.xxl,
   },
-  imageCount: { marginTop: 4, color: "#888", fontSize: 13 },
+  imageCount: {
+    marginTop: spacing.xs,
+    color: colors.textTertiary,
+    fontSize: fontSize.sm,
+  },
 
   addButton: {
-    backgroundColor: "#208AEF",
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 10,
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.xxl,
+    paddingVertical: spacing.lg,
+    borderRadius: radii.md,
     minWidth: 110,
     alignItems: "center",
   },
   addButtonDisabled: { opacity: 0.6 },
-  addButtonText: { color: "#fff", fontSize: 14, fontWeight: "600" },
-
-  notFound: { flex: 1, justifyContent: "center", alignItems: "center", padding: 30 },
-  notFoundTitle: { fontSize: 24, fontWeight: "700", color: "#222", marginBottom: 10 },
-  notFoundText: { color: "#777", textAlign: "center", lineHeight: 21, marginBottom: 25 },
-  backButton: {
-    backgroundColor: "#208AEF",
-    paddingHorizontal: 20,
-    paddingVertical: 13,
-    borderRadius: 10,
+  addButtonText: {
+    color: colors.white,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.semibold,
   },
-  backButtonText: { color: "#fff", fontWeight: "600" },
+
+  notFound: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: spacing.mega,
+  },
+  notFoundTitle: {
+    fontSize: fontSize.h1,
+    fontWeight: fontWeight.bold,
+    color: colors.textPrimary,
+    marginBottom: spacing.lg,
+  },
+  notFoundText: {
+    color: colors.textSecondary,
+    textAlign: "center",
+    lineHeight: 21,
+    marginBottom: spacing.massive + 1,
+  },
+  backButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.giant,
+    paddingVertical: spacing.xl + 1,
+    borderRadius: radii.md,
+  },
+  backButtonText: {
+    color: colors.white,
+    fontWeight: fontWeight.semibold,
+  },
 
   deleteMarkerButton: {
-    marginBottom: 28,
-    paddingVertical: 14,
-    borderRadius: 10,
-    backgroundColor: "#FFE5E5",
+    marginBottom: spacing.colossal,
+    paddingVertical: spacing.xxl,
+    borderRadius: radii.md,
+    backgroundColor: colors.dangerBg,
     alignItems: "center",
   },
-  deleteMarkerText: { color: "#D32F2F", fontSize: 15, fontWeight: "600" },
+  deleteMarkerText: {
+    color: colors.danger,
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.semibold,
+  },
 });

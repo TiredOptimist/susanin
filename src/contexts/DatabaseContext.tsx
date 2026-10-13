@@ -1,23 +1,24 @@
 import * as SQLite from 'expo-sqlite';
 import {
-    createContext,
-    PropsWithChildren,
-    useCallback,
-    useContext,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
+  createContext,
+  PropsWithChildren,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from 'react';
 
+import { config } from '../constants/config';
 import {
-    createImage as createImageOp,
-    createMarker as createMarkerOp,
-    deleteImage as deleteImageOp,
-    deleteMarker as deleteMarkerOp,
-    fetchMarkerById,
-    fetchMarkerImages,
-    fetchMarkers,
+  createImage as createImageOp,
+  createMarker as createMarkerOp,
+  deleteImage as deleteImageOp,
+  deleteMarker as deleteMarkerOp,
+  fetchMarkerById,
+  fetchMarkerImages,
+  fetchMarkers,
 } from '../database/operations';
 import { initDatabase } from '../database/schema';
 import type { Marker, MarkerImage } from '../types';
@@ -65,10 +66,10 @@ export function DatabaseProvider({ children }: PropsWithChildren) {
     (async () => {
       try {
         if (__DEV__) {
-          console.log('[DB] Открытие базы данных markers.db');
+          console.log(`[DB] Открытие базы данных ${config.database.name}`);
         }
 
-        const database = await SQLite.openDatabaseAsync('markers.db');
+        const database = await SQLite.openDatabaseAsync(config.database.name);
 
         await initDatabase(database);
 

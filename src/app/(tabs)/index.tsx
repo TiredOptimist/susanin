@@ -1,7 +1,6 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-  Alert,
   StyleSheet,
   Text,
   TextInput,
@@ -12,8 +11,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import MapComponent from "../../components/Map";
 import ScreenHeader from "../../components/ScreenHeader";
+import { colors } from "../../constants/colors";
+import {
+  fontSize,
+  fontWeight,
+  radii,
+  spacing,
+} from "../../constants/config";
 import { useDatabase } from "../../contexts/DatabaseContext";
 import type { Marker } from "../../types";
+import { showError } from "../../utils/alerts";
 
 export default function HomeScreen() {
   const { markers, addMarker, isLoading, error } = useDatabase();
@@ -37,7 +44,7 @@ export default function HomeScreen() {
     const title = markerTitle.trim();
 
     if (!title) {
-      Alert.alert("Введите название", "Название метки не может быть пустым.");
+      showError("Название метки не может быть пустым.", "Введите название");
       return;
     }
 
@@ -53,7 +60,7 @@ export default function HomeScreen() {
       setPendingCoordinates(null);
     } catch (e) {
       console.error("Ошибка создания маркера:", e);
-      Alert.alert("Ошибка", "Не удалось создать метку.");
+      showError("Не удалось создать метку.");
     }
   };
 
@@ -65,7 +72,7 @@ export default function HomeScreen() {
       });
     } catch (e) {
       console.error("Ошибка навигации к маркеру:", e);
-      Alert.alert("Ошибка", "Не удалось открыть информацию о метке.");
+      showError("Не удалось открыть информацию о метке.");
     }
   };
 
@@ -84,12 +91,10 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <ScreenHeader
         title="Карта"
-        subtitle={
-          isLoading ? "Загрузка..." : `Меток: ${markers.length}`
-        }
+        subtitle={isLoading ? "Загрузка..." : `Меток: ${markers.length}`}
       />
 
       <View style={styles.mapContainer}>
@@ -111,6 +116,9 @@ export default function HomeScreen() {
               value={markerTitle}
               onChangeText={setMarkerTitle}
               placeholder="Например: Дом"
+              placeholderTextColor={colors.textMuted}
+              cursorColor={colors.primaryLight}
+              selectionColor={colors.primaryLight}
               style={styles.input}
               autoFocus
             />
@@ -142,60 +150,87 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: colors.background },
   mapContainer: { flex: 1 },
 
   modalOverlay: {
     position: "absolute",
-    top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.45)",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: colors.overlay,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    padding: spacing.giant,
   },
   modal: {
     width: "100%",
-    backgroundColor: "#fff",
-    borderRadius: 18,
-    padding: 20,
+    backgroundColor: colors.background,
+    borderRadius: radii.xxxl,
+    padding: spacing.giant,
   },
-  modalTitle: { fontSize: 22, fontWeight: "700", color: "#222" },
-  modalText: { marginTop: 6, marginBottom: 15, color: "#777" },
+  modalTitle: {
+    fontSize: fontSize.h2,
+    fontWeight: fontWeight.bold,
+    color: colors.textPrimary,
+  },
+  modalText: {
+    marginTop: spacing.sm,
+    marginBottom: spacing.lg + 5,
+    color: colors.textSecondary,
+  },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 16,
+    borderColor: colors.border,
+    borderRadius: radii.md,
+    paddingHorizontal: spacing.xxl,
+    paddingVertical: spacing.xl,
+    fontSize: fontSize.xl,
+    color: colors.textPrimary,               
+    backgroundColor: colors.backgroundAlt,
   },
   modalButtons: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    marginTop: 15,
-    gap: 10,
+    marginTop: spacing.lg + 5,
+    gap: spacing.lg,
   },
   cancelButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 10,
-    backgroundColor: "#eee",
+    paddingHorizontal: spacing.xxxl,
+    paddingVertical: spacing.xl,
+    borderRadius: radii.md,
+    backgroundColor: colors.backgroundMuted,
   },
-  cancelButtonText: { color: "#444", fontWeight: "600" },
+  cancelButtonText: {
+    color: colors.textMedium,
+    fontWeight: fontWeight.semibold,
+  },
   createButton: {
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderRadius: 10,
-    backgroundColor: "#208AEF",
+    paddingHorizontal: spacing.huge,
+    paddingVertical: spacing.xl,
+    borderRadius: radii.md,
+    backgroundColor: colors.primary,
   },
-  createButtonText: { color: "#fff", fontWeight: "600" },
+  createButtonText: {
+    color: colors.white,
+    fontWeight: fontWeight.semibold,
+  },
 
   errorBox: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 24,
+    padding: spacing.massive,
   },
-  errorTitle: { fontSize: 18, fontWeight: "700", color: "#222" },
-  errorText: { marginTop: 8, color: "#666", textAlign: "center" },
+  errorTitle: {
+    fontSize: fontSize.title,
+    fontWeight: fontWeight.bold,
+    color: colors.textPrimary,
+  },
+  errorText: {
+    marginTop: spacing.md,
+    color: colors.textLight,
+    textAlign: "center",
+  },
 });
