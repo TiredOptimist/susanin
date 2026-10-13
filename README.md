@@ -1,56 +1,95 @@
-# Welcome to your Expo app 👋
+# Susanin — метки на карте
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Мобильное приложение на React Native + Expo для создания геометок
+на карте с возможностью прикреплять к ним фотографии из галереи.
+Все данные хранятся локально в SQLite.
 
-## Get started
+---
 
-1. Install dependencies
+## Содержание
 
-   ```bash
-   npm install
-   ```
+- [Возможности](#возможности)
+- [Технологии](#технологии)
+- [Установка и запуск](#установка-и-запуск)
+- [Структура проекта](#структура-проекта)
+- [Архитектура](#архитектура)
+- [Схема базы данных](#схема-базы-данных)
+- [Обработка ошибок](#обработка-ошибок)
+- [Принятые решения](#принятые-решения)
+- [Известные ограничения](#известные-ограничения)
+- [Возможные улучшения](#возможные-улучшения)
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## Возможности
 
-In the output, you'll find options to open the app in a
+### Карта
+- Полноэкранная интерактивная карта
+- Добавление метки долгим нажатием (≈400 мс) на нужной точке
+- При создании метки запрашивается её название
+- Нажатие на метку открывает экран с деталями
+- Подсказка о долгом нажатии автоматически скрывается через 6 секунд
+- Кнопка «Повторить» при ошибке загрузки карты
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Метки
+- Список всех сохранённых меток на отдельном табе
+- Отображение названия и координат (до 5 знаков после запятой)
+- Переход к деталям по нажатию
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Экран деталей метки
+- Название, широта, долгота, дата создания
+- Удаление метки вместе со всеми её изображениями
+- Список изображений метки в виде сетки 2×N
+- Кнопка «+ Добавить» — множественный выбор изображений из галереи
+- Удаление отдельного изображения через иконку «×»
 
-## Get a fresh project
+### База данных
+- Локальное хранение в SQLite (`expo-sqlite`)
+- Версионирование схемы с реестром миграций
+- Каскадное удаление изображений при удалении метки
+- Проброс ошибок БД в UI с возможностью повторной инициализации
 
-When you're ready, run:
+---
+
+## Технологии
+
+| Технология | Назначение |
+|---|---|
+| **Expo** | Среда разработки и сборки (managed workflow) |
+| **React Native** | Мобильный фреймворк |
+| **TypeScript** | Типизация |
+| **Expo Router** | Файловая маршрутизация (tabs + stack) |
+| **expo-sqlite** | Локальная база данных |
+| **expo-image-picker** | Выбор изображений из галереи |
+| **react-native-webview + MapLibre GL JS** | Отображение карты |
+| **react-native-safe-area-context** | Учёт «чёлки» и системных панелей |
+| **@expo/vector-icons** | Иконки таб-бара |
+
+### Дополнительно настроено в `app.json`
+- **expo-splash-screen** — экран загрузки
+- **expo-location** — плагин подключён (см. «Известные ограничения»)
+- **expo-image-picker** — с русскоязычным текстом разрешения
+- **typedRoutes** и **reactCompiler** — экспериментальные фичи Expo
+
+---
+
+## Установка и запуск
+
+### Требования
+- Node.js LTS
+- npm или yarn
+- Приложение **Expo Go** на телефоне (iOS / Android) *или*
+  Android-эмулятор / iOS-симулятор
+
+### Шаги
 
 ```bash
-npm run reset-project
-```
+# 1. Клонировать репозиторий
+git clone <URL_репозитория>
+cd susanin
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+# 2. Установить зависимости
+npm install
 
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+# 3. Запустить dev-сервер Expo
+npx expo start

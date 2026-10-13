@@ -1,6 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -30,6 +30,8 @@ export default function MarkerDetailsScreen() {
 
   const {
     isLoading: isDbLoading,
+    error: dbError,
+    retryInit,
     getMarker,
     loadMarker,
     getMarkerImages,
@@ -43,10 +45,19 @@ export default function MarkerDetailsScreen() {
   const [isScreenLoading, setIsScreenLoading] = useState(true);
   const [isPickingImage, setIsPickingImage] = useState(false);
 
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   const reloadImages = useCallback(async () => {
     try {
       const list = await getMarkerImages(markerId);
-      setImages(list);
+      if (isMountedRef.current) setImages(list);
     } catch (e) {
       console.error("Не удалось перезагрузить изображения:", e);
     }
@@ -105,7 +116,12 @@ export default function MarkerDetailsScreen() {
       onConfirm: async () => {
         try {
           await deleteMarker(markerId);
-          router.replace("/");
+          try {
+            router.replace("/");
+          } catch (navError) {
+            console.error("Ошибка навигации после удаления:", navError);
+            showError("Метка удалена, но не удалось вернуться к карте.");
+          }
         } catch (e) {
           console.error("Ошибка удаления метки:", e);
           showError("Не удалось удалить метку.");
@@ -147,7 +163,7 @@ export default function MarkerDetailsScreen() {
       console.error("Ошибка выбора изображения:", e);
       showError("Не удалось выбрать изображение. Попробуйте ещё раз.");
     } finally {
-      setIsPickingImage(false);
+      if (isMountedRef.current) setIsPickingImage(false);
     }
   };
 
@@ -166,6 +182,24 @@ export default function MarkerDetailsScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.notFound}>
           <ActivityIndicator size="large" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Ошибка БД — показываем отдельно и даём retry
+  if (dbError && !marker) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.notFound}>
+          <Text style={styles.notFoundTitle}>Ошибка базы данных</Text>
+          <Text style={styles.notFoundText}>{dbError.message}</Text>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={retryInit}
+          >
+            <Text style={styles.backButtonText}>Повторить</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );

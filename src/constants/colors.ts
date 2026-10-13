@@ -36,10 +36,10 @@ export const colors = {
   overlay: "rgba(0,0,0,0.6)",
   overlayStrong: "rgba(0,0,0,0.8)",
   overlayHint: "rgba(0,0,0,0.85)",
-  overlayLight: "rgba(20,20,20,0.95)", // теперь тёмный — под тёмную тему
+  overlayLight: "rgba(20,20,20,0.95)", 
 
   // Табы
-  tabActive: "#4CAF50",        // чуть светлее primary, чтобы читался в баре
+  tabActive: "#4CAF50",        
   tabInactive: "#777777",
 
   // Тени

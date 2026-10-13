@@ -227,6 +227,11 @@ export function buildMapHtml(): string {
           }
         }, { passive: true });
 
+        // Сбрасываем состояние при отмене жеста (звонок, системный жест и т.п.)
+        document.addEventListener("touchcancel", function () {
+          longPressStart = null;
+        }, { passive: true });
+
         document.addEventListener("touchend", function () {
           if (!longPressStart) return;
 

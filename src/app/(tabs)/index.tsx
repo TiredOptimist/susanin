@@ -23,7 +23,7 @@ import type { Marker } from "../../types";
 import { showError } from "../../utils/alerts";
 
 export default function HomeScreen() {
-  const { markers, addMarker, isLoading, error } = useDatabase();
+  const { markers, addMarker, isLoading, error, retryInit } = useDatabase();
 
   const [isNamingMarker, setIsNamingMarker] = useState(false);
   const [markerTitle, setMarkerTitle] = useState("");
@@ -84,6 +84,13 @@ export default function HomeScreen() {
           <View style={styles.errorBox}>
             <Text style={styles.errorTitle}>Не удалось открыть базу</Text>
             <Text style={styles.errorText}>{error.message}</Text>
+
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={retryInit}
+            >
+              <Text style={styles.retryButtonText}>Повторить</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </SafeAreaView>
@@ -187,7 +194,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xxl,
     paddingVertical: spacing.xl,
     fontSize: fontSize.xl,
-    color: colors.textPrimary,               
+    color: colors.textPrimary,
     backgroundColor: colors.backgroundAlt,
   },
   modalButtons: {
@@ -232,5 +239,16 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     color: colors.textLight,
     textAlign: "center",
+    marginBottom: spacing.giant,
+  },
+  retryButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.massive,
+    paddingVertical: spacing.xl,
+    borderRadius: radii.md,
+  },
+  retryButtonText: {
+    color: colors.white,
+    fontWeight: fontWeight.semibold,
   },
 });

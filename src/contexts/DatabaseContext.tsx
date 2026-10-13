@@ -28,6 +28,7 @@ interface DatabaseContextType {
   isLoading: boolean;
   error: Error | null;
   clearError: () => void;
+  retryInit: () => void; // <-- добавлено
 
   addMarker: (
     latitude: number,
@@ -60,51 +61,61 @@ export function DatabaseProvider({ children }: PropsWithChildren) {
 
   const isMountedRef = useRef(true);
 
+  const initDb = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      if (__DEV__) {
+        console.log(`[DB] Открытие базы данных ${config.database.name}`);
+      }
+
+      const database = await SQLite.openDatabaseAsync(config.database.name);
+
+      await initDatabase(database);
+
+      const list = await fetchMarkers(database);
+
+      if (!isMountedRef.current) return;
+
+      setDb(database);
+      setMarkers(list);
+
+      if (__DEV__) {
+        console.log(`[DB] Загружено маркеров: ${list.length}`);
+      }
+    } catch (e) {
+      console.error('[DB] Ошибка инициализации:', e);
+
+      if (isMountedRef.current) {
+        setError(
+          e instanceof Error
+            ? e
+            : new Error('Не удалось инициализировать базу данных')
+        );
+      }
+    } finally {
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     isMountedRef.current = true;
-
-    (async () => {
-      try {
-        if (__DEV__) {
-          console.log(`[DB] Открытие базы данных ${config.database.name}`);
-        }
-
-        const database = await SQLite.openDatabaseAsync(config.database.name);
-
-        await initDatabase(database);
-
-        const list = await fetchMarkers(database);
-
-        if (!isMountedRef.current) return;
-
-        setDb(database);
-        setMarkers(list);
-        setError(null);
-
-        if (__DEV__) {
-          console.log(`[DB] Загружено маркеров: ${list.length}`);
-        }
-      } catch (e) {
-        console.error('[DB] Ошибка инициализации:', e);
-
-        if (isMountedRef.current) {
-          setError(
-            e instanceof Error
-              ? e
-              : new Error('Не удалось инициализировать базу данных')
-          );
-        }
-      } finally {
-        if (isMountedRef.current) {
-          setIsLoading(false);
-        }
-      }
-    })();
+    initDb();
 
     return () => {
       isMountedRef.current = false;
     };
-  }, []);
+  }, [initDb]);
+
+  const retryInit = useCallback(() => {
+    // сбрасываем возможную «залипшую» БД и пробуем снова
+    setDb(null);
+    setMarkers([]);
+    initDb();
+  }, [initDb]);
 
   const runSafely = useCallback(
     async <T,>(fn: () => Promise<T>): Promise<T> => {
@@ -239,6 +250,7 @@ export function DatabaseProvider({ children }: PropsWithChildren) {
       isLoading,
       error,
       clearError,
+      retryInit,
       addMarker,
       deleteMarker,
       getMarker,
@@ -252,6 +264,7 @@ export function DatabaseProvider({ children }: PropsWithChildren) {
       isLoading,
       error,
       clearError,
+      retryInit,
       addMarker,
       deleteMarker,
       getMarker,
