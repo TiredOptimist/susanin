@@ -1,5 +1,5 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { Text } from "react-native";
 
 export default function TabsLayout() {
   return (
@@ -25,10 +25,12 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: "Карта",
-          tabBarIcon: ({ color, size }) => (
-            <Text style={{ color, fontSize: size }}>
-              📍
-            </Text>
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "map" : "map-outline"}
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
@@ -37,10 +39,12 @@ export default function TabsLayout() {
         name="markers"
         options={{
           title: "Все метки",
-          tabBarIcon: ({ color, size }) => (
-            <Text style={{ color, fontSize: size }}>
-              ☰
-            </Text>
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "list" : "list-outline"}
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
