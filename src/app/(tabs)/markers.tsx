@@ -1,5 +1,6 @@
 import { router } from "expo-router";
-import { ActivityIndicator, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import MarkerList from "../../components/MarkerList";
 import ScreenHeader from "../../components/ScreenHeader";

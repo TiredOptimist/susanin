@@ -33,7 +33,7 @@
           "imageWidth": 76
         }
       ],
-       "expo-sqlite",
+      "expo-sqlite",
       [
         "expo-location",
         {
@@ -41,10 +41,10 @@
         }
       ],
       [
-      "expo-image-picker",
-      {
-        "photosPermission": "Разрешите доступ к фото, чтобы прикреплять снимки к меткам на карте."
-      }
+        "expo-image-picker",
+        {
+          "photosPermission": "Разрешите доступ к фото, чтобы прикреплять снимки к меткам на карте."
+        }
       ]
     ],
     "experiments": {

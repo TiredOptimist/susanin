@@ -2,13 +2,13 @@ import { router } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
-  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import MapComponent from "../../components/Map";
 import ScreenHeader from "../../components/ScreenHeader";
@@ -69,7 +69,6 @@ export default function HomeScreen() {
     }
   };
 
-  // Общая ошибка БД (инициализации) — покажем грубо, но наглядно
   if (error && markers.length === 0 && !isLoading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -85,7 +84,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <ScreenHeader
         title="Карта"
         subtitle={
