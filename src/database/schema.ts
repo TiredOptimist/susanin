@@ -1,17 +1,9 @@
 import * as SQLite from 'expo-sqlite';
 
-// Целевая версия схемы. Поднимай на 1 при каждом изменении структуры БД
-// и добавляй соответствующую миграцию в реестр migrations.
 export const DATABASE_VERSION = 1;
 
 type Migration = (db: SQLite.SQLiteDatabase) => Promise<void>;
 
-/**
- * Реестр миграций.
- * Ключ — версия, В КОТОРУЮ переводит миграция.
- * Старые миграции НЕ редактируем, только добавляем новые.
- * Каждая миграция должна быть идемпотентной (IF NOT EXISTS).
- */
 const migrations: Record<number, Migration> = {
   1: async (db) => {
     await db.execAsync(`
@@ -36,7 +28,7 @@ const migrations: Record<number, Migration> = {
     `);
   },
 
-  // Шаблон для будущей миграции (не удаляй комментарий — пригодится):
+  // Шаблон для будущей миграции:
   // 2: async (db) => {
   //   await db.execAsync(`ALTER TABLE markers ADD COLUMN description TEXT;`);
   // },
@@ -45,10 +37,8 @@ const migrations: Record<number, Migration> = {
 export async function initDatabase(
   db: SQLite.SQLiteDatabase
 ): Promise<void> {
-  // PRAGMA нельзя ставить внутри транзакции — выносим наружу
   await db.execAsync('PRAGMA foreign_keys = ON;');
 
-  // Таблица версий должна существовать ДО её чтения
   await db.execAsync(`
     CREATE TABLE IF NOT EXISTS schema_version (
       version INTEGER NOT NULL
@@ -83,7 +73,6 @@ export async function initDatabase(
     );
   }
 
-  // Всё в одной транзакции: если упадёт — откатится целиком
   await db.withTransactionAsync(async () => {
     for (let v = currentVersion + 1; v <= DATABASE_VERSION; v++) {
       const migration = migrations[v];

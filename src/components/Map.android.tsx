@@ -65,7 +65,6 @@ export default function MapComponent({
     return () => clearTimeout(timer);
   }, [isMapReady]);
 
-  // Обновление маркеров (diff внутри JS)
   useEffect(() => {
     if (!isMapReady) return;
 

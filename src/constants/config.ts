@@ -1,4 +1,4 @@
-// Отступы (padding / margin / gap)
+// Отступы
 export const spacing = {
   xxs: 2,
   xs: 4,

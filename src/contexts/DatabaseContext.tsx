@@ -28,7 +28,7 @@ interface DatabaseContextType {
   isLoading: boolean;
   error: Error | null;
   clearError: () => void;
-  retryInit: () => void; // <-- добавлено
+  retryInit: () => void; 
 
   addMarker: (
     latitude: number,
@@ -111,7 +111,6 @@ export function DatabaseProvider({ children }: PropsWithChildren) {
   }, [initDb]);
 
   const retryInit = useCallback(() => {
-    // сбрасываем возможную «залипшую» БД и пробуем снова
     setDb(null);
     setMarkers([]);
     initDb();
