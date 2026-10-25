@@ -1,3 +1,5 @@
+import type * as Location from "expo-location";
+
 export interface Marker {
   id: number;
   latitude: number;
@@ -13,6 +15,16 @@ export interface MarkerImage {
   createdAt: string;
 }
 
-export type MarkerRouteParams = {
-  id: string;
-};
+export type MarkerRouteParams = { id: string };
+
+export interface LocationConfig {
+  accuracy: Location.Accuracy;
+  timeInterval: number;
+  distanceInterval: number;
+}
+
+export interface ActiveNotification {
+  markerId: number;
+  notificationId: string;
+  timestamp: number;
+}

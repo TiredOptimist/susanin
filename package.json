@@ -3,21 +3,22 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "dependencies": {
-    "@expo/ui": "~57.0.22",
+    "@expo/ui": "~57.0.26",
     "@expo/vector-icons": "^15.0.2",
     "dom-to-image": "^2.6.0",
-    "expo": "~57.0.27",
+    "expo": "~57.0.31",
     "expo-constants": "~57.0.20",
     "expo-device": "~57.0.2",
     "expo-font": "~57.0.4",
     "expo-glass-effect": "~57.0.4",
     "expo-image": "~57.0.5",
     "expo-image-picker": "~57.0.20",
-    "expo-linking": "~57.0.12",
-    "expo-location": "~57.0.20",
+    "expo-linking": "~57.0.13",
+    "expo-location": "~57.0.22",
     "expo-media-library": "~57.0.5",
-    "expo-router": "~57.0.25",
-    "expo-splash-screen": "~57.0.9",
+    "expo-notifications": "~57.0.24",
+    "expo-router": "~57.0.29",
+    "expo-splash-screen": "~57.0.10",
     "expo-sqlite": "~57.0.4",
     "expo-status-bar": "~57.0.1",
     "expo-symbols": "~57.0.3",
@@ -38,6 +39,7 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
+    "patch-package": "^8.0.1",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -46,7 +48,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "postinstall": "patch-package"
   },
   "private": true
 }
